@@ -18,6 +18,11 @@ if [ ! -f /tmp/ssh-hostkeys/ssh_host_rsa_key ]; then
     ssh-keygen -t ed25519 -f /tmp/ssh-hostkeys/ssh_host_ed25519_key -N ''
 fi
 
+env | grep -v '^_=' | grep -v '^HOME=' | grep -v '^PWD=' | while IFS='=' read -r key rest; do
+    printf 'export %s="%s"\n' "$key" "$(printf '%s' "$rest" | sed 's/"/\\"/g')"
+done > /home/jovyan/.profile
+chown jovyan:jovyan /home/jovyan/.profile
+
 # Start sshd (port 2222, user jovyan — from sshd_config)
 /usr/sbin/sshd -D -e &
 SSHD_PID=$!
